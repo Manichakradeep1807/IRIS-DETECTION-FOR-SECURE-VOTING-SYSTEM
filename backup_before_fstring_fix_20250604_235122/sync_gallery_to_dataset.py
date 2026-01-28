@@ -1,0 +1,202 @@
+#!/usr/bin/env python3
+"""
+Sync Gallery to Dataset Script
+Automatically syncs captured iris images from gallery to sample dataset folder structure
+"""
+
+import os
+import shutil
+import sys
+from datetime import datetime
+
+def sync_gallery_to_dataset():
+    """Sync captured iris images to sample dataset folder structure"""
+    print("🔄 IRIS GALLERY TO DATASET SYNC")
+    print("=" * 50)
+    
+    try:
+        capture_folder = "captured_iris"
+        dataset_folder = "sample_dataset"
+        
+        # Check if captured images folder exists
+        if not os.path.exists(capture_folder):
+            print("❌ No captured images folder found!")
+            print("   To capture iris images:")
+            print("   1. Run the main iris recognition system")
+            print("   2. Click 'LIVE RECOGNITION'")
+            print("   3. Let the system recognize iris patterns")
+            print("   4. Images will be automatically captured")
+            return False
+            
+        # Ensure dataset folder exists
+        os.makedirs(dataset_folder, exist_ok=True)
+        print(f"📁 Dataset folder: {dataset_folder}")
+        
+        synced_count = 0
+        new_persons = 0
+        skipped_count = 0
+        error_count = 0
+        
+        # Get all captured images
+        image_files = [f for f in os.listdir(capture_folder) 
+                      if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+        
+        print(f"📊 Found {len(image_files)} captured images")
+        print()
+        
+        if not image_files:
+            print("ℹ️ No images to sync")
+            return True
+        
+        for filename in image_files:
+            print(f"Processing: {filename}")
+            
+            if filename.lower().endswith(('.jpg', '.jpeg', '.png')):
+                # Extract person ID from filename (iris_person[ID]_timestamp.jpg)
+                try:
+                    if filename.startswith('iris_person'):
+                        # Extract person ID
+                        parts = filename.split('_')
+                        if len(parts) >= 2:
+                            person_part = parts[1]  # person[ID]
+                            person_id = person_part.replace('person', '')
+                            
+                            print(f"   👤 Person ID: {person_id}")
+                            
+                            # Create person folder in dataset
+                            person_folder = f"{dataset_folder}/person_{person_id.zfill(3)}"
+                            if not os.path.exists(person_folder):
+                                os.makedirs(person_folder, exist_ok=True)
+                                new_persons += 1
+                                print(f"   📁 Created new person folder: {person_folder}")
+                            
+                            # Count existing samples in person folder
+                            existing_samples = len([f for f in os.listdir(person_folder) 
+                                                  if f.startswith('sample_') and f.endswith('.jpg')])
+                            
+                            # Copy image to dataset with sample naming
+                            source_path = os.path.join(capture_folder, filename)
+                            sample_filename = f"sample_{existing_samples + 1}.jpg"
+                            dest_path = os.path.join(person_folder, sample_filename)
+                            
+                            # Only copy if not already exists
+                            if not os.path.exists(dest_path):
+                                shutil.copy2(source_path, dest_path)
+                                synced_count += 1
+                                print(f"   ✅ Synced to: {dest_path}")
+                            else:
+                                skipped_count += 1
+                                print(f"   ⏭️ Already exists: {dest_path}")
+                        else:
+                            print(f"   ⚠️ Could not parse filename format")
+                            error_count += 1
+                    else:
+                        print(f"   ⚠️ Not an iris image (doesn't start with 'iris_person')")
+                        error_count += 1
+                        
+                except Exception as e:
+                    print(f"   ❌ Error processing {filename}: {e}")
+                    error_count += 1
+                    continue
+            
+            print()  # Empty line for readability
+                    
+        # Print summary
+        print("=" * 50)
+        print("📋 SYNC SUMMARY")
+        print("=" * 50)
+        print(f"✅ Successfully synced: {synced_count} images")
+        print(f"👤 New person folders created: {new_persons}")
+        print(f"⏭️ Already synced (skipped): {skipped_count}")
+        print(f"❌ Errors: {error_count}")
+        print()
+        
+        if synced_count > 0:
+            print("🎉 Sync completed successfully!")
+            print(f"📁 Images are now available in: {dataset_folder}/")
+            print("   You can now use these images for training the model")
+        elif skipped_count > 0:
+            print("ℹ️ All images were already synced to dataset")
+        else:
+            print("⚠️ No images were synced")
+            
+        return True
+        
+    except Exception as e:
+        print(f"❌ Error in sync process: {e}")
+        return False
+
+def show_dataset_structure():
+    """Show the current dataset structure"""
+    print("\n📁 CURRENT DATASET STRUCTURE")
+    print("=" * 50)
+    
+    dataset_folder = "sample_dataset"
+    if not os.path.exists(dataset_folder):
+        print("❌ Dataset folder does not exist")
+        return
+    
+    person_folders = [f for f in os.listdir(dataset_folder) 
+                     if os.path.isdir(os.path.join(dataset_folder, f)) and f.startswith('person_')]
+    
+    if not person_folders:
+        print("📂 Dataset folder is empty")
+        return
+    
+    person_folders.sort()
+    total_images = 0
+    
+    for person_folder in person_folders:
+        person_path = os.path.join(dataset_folder, person_folder)
+        images = [f for f in os.listdir(person_path) if f.endswith('.jpg')]
+        total_images += len(images)
+        print(f"👤 {person_folder}: {len(images)} images")
+    
+    print(f"\n📊 Total: {len(person_folders)} people, {total_images} images")
+
+def main():
+    """Main function"""
+    print("🖼️ IRIS GALLERY TO DATASET SYNC TOOL")
+    print("=" * 60)
+    print("This tool syncs captured iris images to the sample dataset folder")
+    print("for training and recognition purposes.")
+    print()
+    
+    # Show current status
+    capture_folder = "captured_iris"
+    if os.path.exists(capture_folder):
+        captured_files = [f for f in os.listdir(capture_folder) 
+                         if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
+        print(f"📸 Captured images: {len(captured_files)}")
+    else:
+        print("📸 Captured images: 0 (folder not found)")
+    
+    # Show dataset status
+    dataset_folder = "sample_dataset"
+    if os.path.exists(dataset_folder):
+        person_folders = [f for f in os.listdir(dataset_folder) 
+                         if os.path.isdir(os.path.join(dataset_folder, f))]
+        print(f"📁 Dataset persons: {len(person_folders)}")
+    else:
+        print("📁 Dataset persons: 0 (folder not found)")
+    
+    print()
+    
+    # Perform sync
+    success = sync_gallery_to_dataset()
+    
+    if success:
+        # Show updated structure
+        show_dataset_structure()
+    
+    print("\n" + "=" * 60)
+    print("🔧 USAGE TIPS")
+    print("=" * 60)
+    print("• Run this script after capturing iris images")
+    print("• Images will be organized by person ID in sample_dataset/")
+    print("• Each person folder contains sample_1.jpg, sample_2.jpg, etc.")
+    print("• Use these organized images for model training")
+    print("• The main application now auto-syncs new captures")
+
+if __name__ == "__main__":
+    main()

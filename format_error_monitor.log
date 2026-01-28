@@ -1,0 +1,37 @@
+2025-06-05 10:27:53,583 - __main__ - INFO - ============================================================
+2025-06-05 10:27:53,583 - __main__ - INFO - Monitoring for: 'unsupported format string passed to bytes.__format__'
+2025-06-05 10:27:53,585 - __main__ - INFO - ============================================================
+2025-06-05 10:27:53,591 - __main__ - INFO - 
+==================================================
+2025-06-05 10:27:53,591 - __main__ - INFO - Running test: Voting System
+2025-06-05 10:27:53,593 - __main__ - INFO - ==================================================
+2025-06-05 10:27:53,665 - __main__ - INFO - 1. Testing basic voting operations...
+2025-06-05 10:27:53,672 - __main__ - INFO - 2. Testing vote casting scenarios...
+2025-06-05 10:27:53,710 - __main__ - INFO - 3. Testing results retrieval...
+2025-06-05 10:27:53,715 - __main__ - INFO - 
+==================================================
+2025-06-05 10:27:53,715 - __main__ - INFO - Running test: String Formatting
+2025-06-05 10:27:53,715 - __main__ - INFO - ==================================================
+2025-06-05 10:27:53,716 - __main__ - INFO - 1. Testing basic format patterns...
+2025-06-05 10:27:53,723 - __main__ - INFO - 2. Testing bytes handling...
+2025-06-05 10:27:53,724 - __main__ - INFO - 3. Testing hash generation patterns...
+2025-06-05 10:27:53,728 - __main__ - INFO - 4. Testing complex formatting scenarios...
+2025-06-05 10:27:53,732 - __main__ - INFO - 
+==================================================
+2025-06-05 10:27:53,733 - __main__ - INFO - Running test: GUI Operations
+2025-06-05 10:27:53,733 - __main__ - INFO - ==================================================
+2025-06-05 10:27:53,734 - __main__ - INFO - 1. Testing basic GUI setup...
+2025-06-05 10:27:53,804 - __main__ - INFO - 2. Testing message formatting for GUI...
+2025-06-05 10:27:53,810 - __main__ - INFO - 3. Testing text widget operations...
+2025-06-05 10:27:53,823 - __main__ - INFO - 
+============================================================
+2025-06-05 10:27:53,824 - __main__ - INFO - ============================================================
+2025-06-05 10:27:53,829 - __main__ - INFO - 
+Total: 3 passed, 0 failed
+2025-06-05 10:27:53,829 - __main__ - INFO - Errors detected: 0
+2025-06-05 10:27:53,830 - __main__ - INFO - The system appears to be working correctly
+2025-06-05 10:27:53,831 - __main__ - INFO - 
+If you still experience the error:
+2025-06-05 10:27:53,831 - __main__ - INFO - 1. Run this script immediately when the error occurs
+2025-06-05 10:27:53,831 - __main__ - INFO - 2. Note the exact sequence of actions that trigger it
+2025-06-05 10:27:53,831 - __main__ - INFO - 3. Check the log file for any missed errors

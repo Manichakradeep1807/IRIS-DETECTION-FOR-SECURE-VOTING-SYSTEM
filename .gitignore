@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+*.db
+dev_archive/
+logs/
+receipts/
+captured_iris/
+*.h5
+*.weights.h5
+.vscode/
+voting_results_password.txt

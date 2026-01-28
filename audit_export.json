@@ -1,0 +1,22 @@
+[
+  {
+    "id": 2,
+    "event_time": "2025-09-10T18:57:08.572081",
+    "actor_username": "admin",
+    "action": "view_results",
+    "resource": "dashboard",
+    "details": "{\"total_votes\": 1}",
+    "prev_hash": "1602715d524bea95041f9f129213453462a08323e041bfa4103c52ae09c60a25",
+    "record_hash": "8c3712b1a9744d70567b23ce9ebd48806ad76f71030fc5fd02b446a97a3035f0"
+  },
+  {
+    "id": 1,
+    "event_time": "2025-09-10T18:52:13.637860",
+    "actor_username": "admin",
+    "action": "view_results",
+    "resource": "dashboard",
+    "details": "{\"total_votes\": 1}",
+    "prev_hash": null,
+    "record_hash": "1602715d524bea95041f9f129213453462a08323e041bfa4103c52ae09c60a25"
+  }
+]

@@ -1,0 +1,5 @@
+Requirement already satisfied: SpeechRecognition in c:\users\hp\appdata\local\programs\python\python313\lib\site-packages (3.14.3)
+Requirement already satisfied: typing-extensions in c:\users\hp\appdata\local\programs\python\python313\lib\site-packages (from SpeechRecognition) (4.13.2)
+Requirement already satisfied: standard-aifc in c:\users\hp\appdata\local\programs\python\python313\lib\site-packages (from SpeechRecognition) (3.13.0)
+Requirement already satisfied: audioop-lts in c:\users\hp\appdata\local\programs\python\python313\lib\site-packages (from SpeechRecognition) (0.2.1)
+Requirement already satisfied: standard-chunk in c:\users\hp\appdata\local\programs\python\python313\lib\site-packages (from standard-aifc->SpeechRecognition) (3.13.0)

@@ -1,0 +1,14 @@
+Collecting scikit-learn
+  Downloading scikit_learn-1.6.1-cp313-cp313-win_amd64.whl.metadata (15 kB)
+Requirement already satisfied: numpy>=1.19.5 in c:\users\hp\appdata\local\programs\python\python313\lib\site-packages (from scikit-learn) (2.2.6)
+Requirement already satisfied: scipy>=1.6.0 in c:\users\hp\appdata\local\programs\python\python313\lib\site-packages (from scikit-learn) (1.15.3)
+Collecting joblib>=1.2.0 (from scikit-learn)
+  Using cached joblib-1.5.1-py3-none-any.whl.metadata (5.6 kB)
+Collecting threadpoolctl>=3.1.0 (from scikit-learn)
+  Using cached threadpoolctl-3.6.0-py3-none-any.whl.metadata (13 kB)
+Downloading scikit_learn-1.6.1-cp313-cp313-win_amd64.whl (11.1 MB)
+   ---------------------------------------- 11.1/11.1 MB 3.0 MB/s eta 0:00:00
+Using cached joblib-1.5.1-py3-none-any.whl (307 kB)
+Using cached threadpoolctl-3.6.0-py3-none-any.whl (18 kB)
+Installing collected packages: threadpoolctl, joblib, scikit-learn
+Successfully installed joblib-1.5.1 scikit-learn-1.6.1 threadpoolctl-3.6.0
