@@ -64,7 +64,8 @@ class IntegratedVotingAuthenticator(LiveIrisRecognition if LIVE_REC_AVAILABLE el
             self.on_fail("Live Recognition module missing")
             return
             
-        self.cap = cv2.VideoCapture(0)
+        # Use DirectShow backend for better Windows compatibility
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         if not self.cap.isOpened():
             self.on_fail("Cannot access camera")
             return

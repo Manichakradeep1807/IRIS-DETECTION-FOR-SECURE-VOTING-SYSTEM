@@ -92,7 +92,13 @@ class LiveIrisRecognition:
             return False
         
         # Initialize camera
-        self.cap = cv2.VideoCapture(0)
+        # Initialize camera with DirectShow backend for Windows compatibility
+        self.cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
+        if not self.cap.isOpened():
+            # Fallback to default if DSHOW fails
+            print("Warning: DirectShow failed, trying default backend...")
+            self.cap = cv2.VideoCapture(0)
+            
         if not self.cap.isOpened():
             messagebox.showerror("Camera Error", "Could not open camera")
             return False
