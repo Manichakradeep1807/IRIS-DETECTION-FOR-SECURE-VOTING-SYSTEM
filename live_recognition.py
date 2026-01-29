@@ -705,7 +705,30 @@ class LiveIrisRecognition:
         try:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]  # Include milliseconds
             person_id = prediction['person_id']
+            
+            # Ensure name is available
             name = prediction.get('name', 'Unknown')
+            if (name == 'Unknown' or not name) and ENHANCED_FEATURES:
+                try:
+                     # Attempt to fetch from DB
+                     if not hasattr(self, 'person_name_cache'):
+                         self.person_name_cache = {}
+                     
+                     if person_id in self.person_name_cache:
+                         name = self.person_name_cache[person_id]
+                     else:
+                         person = db.get_person(person_id)
+                         if person:
+                             name = person['name']
+                             self.person_name_cache[person_id] = name
+                         else:
+                             name = f"Person {person_id}" # Fallback if ID not in DB
+                     
+                     # Update prediction for consistency
+                     prediction['name'] = name
+                except Exception as e:
+                     logger.warning(f"Failed to fetch name for capture: {e}")
+            
             confidence = prediction['confidence']
 
             # Anti-Spam: Prevent capturing same person multiple times rapidly
