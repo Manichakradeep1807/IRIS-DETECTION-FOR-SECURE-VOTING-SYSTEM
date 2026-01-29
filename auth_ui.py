@@ -118,7 +118,7 @@ def show_user_login(on_success):
             return None
         cap = None
         try:
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
             if not cap.isOpened():
                 return None
             # Warm up a few frames
@@ -320,7 +320,7 @@ def show_user_login(on_success):
             _pil_ok = False
 
         try:
-            cap = cv2.VideoCapture(0)
+            cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         except Exception:
             cap = None
         if cap is None or not cap.isOpened():

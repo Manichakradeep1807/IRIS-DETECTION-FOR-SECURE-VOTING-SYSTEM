@@ -192,7 +192,8 @@ class HeadlessIrisCapture:
         print()
         
         # Initialize camera
-        cap = cv2.VideoCapture(0)
+        # Initialize camera with DirectShow
+        cap = cv2.VideoCapture(0, cv2.CAP_DSHOW)
         if not cap.isOpened():
             print("❌ Camera not accessible")
             return False
