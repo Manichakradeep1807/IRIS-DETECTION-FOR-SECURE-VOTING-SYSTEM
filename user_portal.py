@@ -644,7 +644,17 @@ class UserPortal:
     def view_receipts(self):
         try:
             # Prioritize JPG, then PDF, then JSON
-            files = glob.glob("vote_receipt_*.jpg") + glob.glob("vote_receipt_*.pdf") + glob.glob("vote_receipt_*.json")
+            # Prioritize JPG, then PDF, then JSON in receipts folder
+            receipt_dir = "receipts"
+            if not os.path.exists(receipt_dir):
+                os.makedirs(receipt_dir)
+                
+            files = glob.glob(os.path.join(receipt_dir, "vote_receipt_*.jpg")) + \
+                    glob.glob(os.path.join(receipt_dir, "vote_receipt_*.pdf")) + \
+                    glob.glob(os.path.join(receipt_dir, "vote_receipt_*.json")) + \
+                    glob.glob("vote_receipt_*.jpg") + \
+                    glob.glob("vote_receipt_*.pdf") + \
+                    glob.glob("vote_receipt_*.json")
             files.sort(key=os.path.getmtime, reverse=True)
             
             win = tk.Toplevel(self.root)

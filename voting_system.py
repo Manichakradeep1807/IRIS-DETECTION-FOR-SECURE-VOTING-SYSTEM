@@ -652,7 +652,11 @@ def show_voting_interface(person_id: int, confidence_score: float):
                 messagebox.showinfo("Vote Cast Successfully", success_message)
                 # Save receipt locally (JSON)
                 try:
-                    receipt_path = "vote_receipt_{}_{}.json".format(person_id, datetime.now().strftime('%Y%m%d_%H%M%S'))
+                    receipt_dir = "receipts"
+                    if not os.path.exists(receipt_dir):
+                        os.makedirs(receipt_dir)
+                        
+                    receipt_path = os.path.join(receipt_dir, "vote_receipt_{}_{}.json".format(person_id, datetime.now().strftime('%Y%m%d_%H%M%S')))
                     with open(receipt_path, 'w') as f:
                         json.dump({
                             'person_id': person_id,
@@ -991,7 +995,11 @@ def show_enhanced_voting_interface(person_id: int, confidence_score: float, iris
                         messagebox.showinfo("Vote Cast Successfully", receipt_msg)
                         # Save receipt
                         try:
-                            receipt_path = "vote_receipt_{}_{}.json".format(person_id, datetime.now().strftime('%Y%m%d_%H%M%S'))
+                            receipt_dir = "receipts"
+                            if not os.path.exists(receipt_dir):
+                                os.makedirs(receipt_dir)
+                                
+                            receipt_path = os.path.join(receipt_dir, "vote_receipt_{}_{}.json".format(person_id, datetime.now().strftime('%Y%m%d_%H%M%S')))
                             with open(receipt_path, 'w') as f:
                                 json.dump({
                                     'person_id': person_id,

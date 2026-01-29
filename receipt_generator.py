@@ -147,25 +147,23 @@ def generate_pdf_receipt(person_id, username, party_name, party_symbol, timestam
     draw.rectangle([(0, height-40), (width, height)], fill=navy_blue)
 
     # 7. Save
+    receipt_dir = "receipts"
+    if not os.path.exists(receipt_dir):
+        os.makedirs(receipt_dir)
+        
     filename = f"vote_receipt_{person_id}_{int(datetime.datetime.now().timestamp())}.pdf"
-    if os.path.exists(filename):
-        os.remove(filename)
-    img.save(filename, "PDF", resolution=150.0)
-    return filename
+    filepath = os.path.join(receipt_dir, filename)
+    
+    if os.path.exists(filepath):
+        os.remove(filepath)
+    img.save(filepath, "PDF", resolution=150.0)
+    return filepath
 
 def generate_jpeg_receipt(person_id, username, party_name, party_symbol, timestamp, confidence_score, election="General"):
     """
     Generate a high-quality JPEG receipt.
     Same logic as PDF but saves as image.
     """
-    # 1. Create Image (Reuse logic or call internal helper? For safety, I'll copy the drawing logic briefly or refactor if I could. 
-    # Since I can't refactor easily without replacing whole file, I will implement it fully here or invoke a shared drawer if I created one.
-    # To avoid huge replacement, I will assume the prompt allows me to just Duplicate the logic or I will return the image object if I could.
-    # But I can't change the original function signature easily without breaking potential callers? 
-    # Actually, I can just copy the code since it's "mini project" style.
-    
-    # ... Wait, the user said "replace all the json files to downloadable jpeg files".
-    # I should probably just make a function that does the drawing and saves as JPEG.
     
     width = 1240
     height = 1754 
@@ -245,11 +243,17 @@ def generate_jpeg_receipt(person_id, username, party_name, party_symbol, timesta
         
     draw.rectangle([(0, height-40), (width, height)], fill=navy_blue)
     
-    # Save as JPEG
+    # Save as JPEG in receipts folder
+    receipt_dir = "receipts"
+    if not os.path.exists(receipt_dir):
+        os.makedirs(receipt_dir)
+
     filename = f"vote_receipt_{person_id}_{int(datetime.datetime.now().timestamp())}.jpg"
-    if os.path.exists(filename): os.remove(filename)
-    img.save(filename, "JPEG", quality=95)
-    return filename
+    filepath = os.path.join(receipt_dir, filename)
+    
+    if os.path.exists(filepath): os.remove(filepath)
+    img.save(filepath, "JPEG", quality=95)
+    return filepath
 
 if __name__ == "__main__":
     # Test
