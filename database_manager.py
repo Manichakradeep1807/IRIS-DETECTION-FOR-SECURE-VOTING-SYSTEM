@@ -159,6 +159,8 @@ class IrisDatabase:
                     cursor.execute('ALTER TABLE users ADD COLUMN failed_attempts INTEGER DEFAULT 0')
                 if 'lock_until' not in cols:
                     cursor.execute('ALTER TABLE users ADD COLUMN lock_until TIMESTAMP')
+                if 'face_vector' not in cols:
+                    cursor.execute('ALTER TABLE users ADD COLUMN face_vector BLOB')
             except Exception:
                 pass
 
@@ -642,6 +644,32 @@ class IrisDatabase:
         password_hash = self.hash_password_with_pbkdf2(password)
         return self.create_user(username=username, password_hash=password_hash, role=role, display_name=display_name, totp_secret=totp_secret)
 
+    def update_user_face(self, username: str, face_blob: bytes) -> bool:
+        """Update admin/user face vector"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('UPDATE users SET face_vector = ? WHERE username = ?', (face_blob, username))
+                conn.commit()
+                return True
+        except Exception as e:
+            logger.error(f"Failed to update user face: {e}")
+            return False
+
+    def get_user_face(self, username: str) -> Optional[bytes]:
+        """Get admin/user face vector"""
+        try:
+            with self.get_connection() as conn:
+                cursor = conn.cursor()
+                cursor.execute('SELECT face_vector FROM users WHERE username = ?', (username,))
+                row = cursor.fetchone()
+                if row and row['face_vector']:
+                    return row['face_vector']
+            return None
+        except Exception as e:
+            logger.error(f"Failed to get user face: {e}")
+            return None
+            
     def get_user(self, username: str) -> Optional[Dict]:
         with self.get_connection() as conn:
             cursor = conn.cursor()

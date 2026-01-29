@@ -20,6 +20,18 @@ try:
     DB_AVAILABLE = True
 except ImportError:
     DB_AVAILABLE = False
+    
+try:
+    import cv2
+    import numpy as np
+    from auth_ui import _capture_face_vector_with_webcam
+except ImportError:
+    pass
+
+try:
+    from voting_system import voting_system
+except ImportError:
+    pass
 
 class AdminPortal:
     def __init__(self, root, admin_data, logout_callback=None):
@@ -116,6 +128,16 @@ class AdminPortal:
         self.create_action_btn(actions_frame, "Add New Admin", self.show_add_admin_modal, self.colors['accent_secondary'])
         self.create_action_btn(actions_frame, "View Audit Logs", self.show_audit_logs, self.colors['secondary'])
         self.create_action_btn(actions_frame, "Open Iris Gallery", self.show_iris_gallery, self.colors['accent_primary'])
+
+        # Election Controls
+        tk.Label(self.content_area, text="Election Controls", font=(self.fonts['primary'], 18, "bold"),
+                 fg=self.colors['text_primary'], bg=self.colors['primary']).pack(anchor="w", pady=(40, 15))
+        
+        election_frame = tk.Frame(self.content_area, bg=self.colors['primary'])
+        election_frame.pack(fill=tk.X, anchor="w")
+
+        self.create_action_btn(election_frame, "🔄 Refresh Votes (Reset)", self.initiate_vote_reset, self.colors['danger'])
+        self.create_action_btn(election_frame, "👤 Register Admin Face", self.register_admin_face, self.colors['warning'])
 
     def show_iris_gallery(self):
         self.clear_content()
@@ -457,6 +479,92 @@ class AdminPortal:
         tk.Button(modal, text="Create Admin Account", command=save,
                  bg=self.colors['accent_primary'], fg="#0f172a", font=(self.fonts['primary'], 12, "bold"),
                  relief="flat", pady=10).pack(pady=40, padx=50, fill=tk.X)
+
+    def register_admin_face(self):
+        """Register face for the current admin"""
+        username = self.admin_data.get('username')
+        
+        if not messagebox.askyesno("Face Registration", 
+                "You are about to register your face for high-security actions actions (like resetting votes).\n\n"
+                "Please look directly at the camera and ensure good lighting.\n\nReady?"):
+            return
+
+        try:
+            messagebox.showinfo("Instructions", "Camera will open. Look at the camera until capture completes.")
+            face_vec = _capture_face_vector_with_webcam()
+            
+            if face_vec is None:
+                messagebox.showerror("Error", "Failed to capture face. Please try again.")
+                return
+                
+            # Convert numpy array to bytes for storage
+            face_blob = face_vec.tobytes()
+            
+            if db.update_user_face(username, face_blob):
+                messagebox.showinfo("Success", "Face registered successfully! You can now use biometric verification.")
+            else:
+                messagebox.showerror("Error", "Failed to save face data to database.")
+                
+        except Exception as e:
+            messagebox.showerror("Error", f"An error occurred: {e}")
+
+    def initiate_vote_reset(self):
+        """Secure vote reset with biometric verification"""
+        username = self.admin_data.get('username')
+        
+        # 1. Check if face is registered
+        stored_face_blob = db.get_user_face(username)
+        if not stored_face_blob:
+            messagebox.showwarning("Not Registered", 
+                "You must register your face first to use this feature.\n"
+                "Please click 'Register Admin Face' button.")
+            return
+
+        # 2. Warning
+        if not messagebox.askyesno("Security Check", 
+                "⚠️ CRITICAL ACTION ⚠️\n\n"
+                "You are attempting to DELETE ALL VOTES to start a new election.\n"
+                "This action requires Biometric Face Verification.\n\n"
+                "Proceed with verification?"):
+            return
+
+        # 3. Capture Live Face
+        messagebox.showinfo("Verification", "Please look at the camera for verification.")
+        try:
+            live_vec = _capture_face_vector_with_webcam()
+            if live_vec is None:
+                messagebox.showerror("Error", "Could not capture face.")
+                return
+
+            # 4. Compare
+            stored_vec = np.frombuffer(stored_face_blob, dtype=np.float32)
+            
+            # Cosine Similarity
+            dot_product = np.dot(live_vec, stored_vec)
+            norm_a = np.linalg.norm(live_vec)
+            norm_b = np.linalg.norm(stored_vec)
+            similarity = dot_product / (norm_a * norm_b)
+            
+            print(f"DEBUG: Admin Face Auth Similarity: {similarity}")
+
+            if similarity > 0.6:  # Threshold for verification
+                # 5. Final Confirmation
+                if messagebox.askyesno("Final Confirmation", 
+                        "✅ Identity Verified.\n\n"
+                        "Are you absolutely sure you want to DELETE ALL VOTES?\n"
+                        "This will reset the election results permanently!"):
+                    
+                    if voting_system.clear_all_votes():
+                        messagebox.showinfo("Success", "All votes have been deleted. The election has been reset.")
+                        # Refresh Dashboard
+                        self.show_dashboard()
+                    else:
+                        messagebox.showerror("Error", "Failed to clear votes from database.")
+            else:
+                messagebox.showerror("Access Denied", "Face verification failed. Identity not confirmed.")
+
+        except Exception as e:
+            messagebox.showerror("Error", f"Verification process failed: {e}")
 
     # --- Helpers ---
     def create_stat_card(self, parent, col, title, value, icon, color):
