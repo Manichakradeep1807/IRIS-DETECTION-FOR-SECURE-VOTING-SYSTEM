@@ -24,7 +24,7 @@ except ImportError:
 try:
     import cv2
     import numpy as np
-    from auth_ui import _capture_face_vector_with_webcam
+    from biometric_utils import capture_face_vector_from_camera
 except ImportError:
     pass
 
@@ -491,7 +491,7 @@ class AdminPortal:
 
         try:
             messagebox.showinfo("Instructions", "Camera will open. Look at the camera until capture completes.")
-            face_vec = _capture_face_vector_with_webcam()
+            face_vec = capture_face_vector_from_camera()
             
             if face_vec is None:
                 messagebox.showerror("Error", "Failed to capture face. Please try again.")
@@ -531,7 +531,7 @@ class AdminPortal:
         # 3. Capture Live Face
         messagebox.showinfo("Verification", "Please look at the camera for verification.")
         try:
-            live_vec = _capture_face_vector_with_webcam()
+            live_vec = capture_face_vector_from_camera()
             if live_vec is None:
                 messagebox.showerror("Error", "Could not capture face.")
                 return

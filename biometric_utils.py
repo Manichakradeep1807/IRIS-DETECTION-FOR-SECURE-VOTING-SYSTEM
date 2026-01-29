@@ -125,3 +125,56 @@ def getIrisFeatures(image_source):
     except Exception as e:
         print(f"Error in iris extraction: {e}")
         return None
+
+def get_face_vector_from_image(image_bgr):
+    """
+    Extract a simple face feature vector (flattened normalized grayscale).
+    This matches the logic used in auth_ui used for compatibility.
+    """
+    try:
+        # Gray conversion
+        if len(image_bgr.shape) == 3:
+            gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
+        else:
+            gray = image_bgr
+            
+        # Resize to standard 100x100
+        resized = cv2.resize(gray, (100, 100))
+        
+        # Vectorize
+        vec = resized.astype(np.float32).flatten()
+        norm = np.linalg.norm(vec) or 1.0
+        return (vec / norm).astype(np.float32)
+    except Exception:
+        return None
+
+def capture_face_vector_from_camera(source=0):
+    """
+    Capture live face vector from default camera.
+    Returns ndarray or None.
+    """
+    cap = None
+    try:
+        # Try DSHOW first for Windows
+        cap = cv2.VideoCapture(source, cv2.CAP_DSHOW)
+        if not cap.isOpened():
+             cap = cv2.VideoCapture(source)
+             
+        if not cap.isOpened():
+            return None
+            
+        # Warm up
+        for _ in range(10):
+            cap.read()
+            
+        ret, frame = cap.read()
+        if not ret:
+            return None
+            
+        return get_face_vector_from_image(frame)
+    except Exception as e:
+        print(f"Face capture error: {e}")
+        return None
+    finally:
+        if cap:
+            cap.release()
