@@ -399,6 +399,30 @@ class LiveIrisRecognition:
             if best_result:
                 self.successful_recognitions += 1
                 
+                # Fetch person name
+                person_id = best_result['person_id']
+                if ENHANCED_FEATURES:
+                    try:
+                        # Simple cache to avoid DB hits every frame
+                        if not hasattr(self, 'person_name_cache'):
+                            self.person_name_cache = {}
+                        
+                        if person_id in self.person_name_cache:
+                             best_result['name'] = self.person_name_cache[person_id]
+                        else:
+                             person = db.get_person(person_id)
+                             if person:
+                                 name = person['name']
+                                 self.person_name_cache[person_id] = name
+                                 best_result['name'] = name
+                             else:
+                                 best_result['name'] = "Unknown"
+                    except Exception as e:
+                        best_result['name'] = "Unknown"
+                        logger.warning(f"Could not fetch person name: {e}")
+                else:
+                    best_result['name'] = "Unknown"
+
                 # Log to database if enhanced features available
                 if ENHANCED_FEATURES:
                     try:
@@ -582,7 +606,8 @@ class LiveIrisRecognition:
         cv2.rectangle(frame, (x, y), (x+w, y+h), color, 3)
         
         # Add recognition text
-        text = f"Person {person_id}: {confidence:.2f}"
+        name = result.get('name', f"Person {person_id}")
+        text = f"{name}: {confidence:.2f}"
         cv2.putText(frame, text, (x, y-30), 
                    cv2.FONT_HERSHEY_SIMPLEX, 0.7, color, 2)
         
@@ -680,6 +705,7 @@ class LiveIrisRecognition:
         try:
             timestamp = datetime.now().strftime('%Y%m%d_%H%M%S_%f')[:-3]  # Include milliseconds
             person_id = prediction['person_id']
+            name = prediction.get('name', 'Unknown')
             confidence = prediction['confidence']
 
             # Anti-Spam: Prevent capturing same person multiple times rapidly
@@ -706,16 +732,25 @@ class LiveIrisRecognition:
             composite[iris_y_offset:iris_y_offset+iris_image.shape[0],
                      iris_x_offset:iris_x_offset+iris_image.shape[1]] = iris_image
 
-            # Add text labels
-            cv2.putText(composite, f"Person {person_id} - Confidence: {confidence:.2f}",
-                       (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 2)
+            # Add text labels with Name
+            label_text = f"ID: {person_id} | {name}"
+            conf_text = f"Conf: {confidence:.2f}"
+            
+            cv2.putText(composite, label_text,
+                       (10, 15), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 0), 1)
+            cv2.putText(composite, conf_text,
+                       (10, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1)
+                       
             cv2.putText(composite, "Eye Region", (10, eye_y_offset + eye_roi.shape[0] + 15),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
             cv2.putText(composite, "Extracted Iris", (iris_x_offset, iris_y_offset + iris_image.shape[0] + 15),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
+            # Sanitize name for filename
+            clean_name = "".join([c for c in name if c.isalnum() or c in (' ', '_', '-')]).strip().replace(' ', '_')
+            
             # Save the composite image
-            filename = f"{self.capture_folder}/iris_person{person_id}_{timestamp}.jpg"
+            filename = f"{self.capture_folder}/iris_person{person_id}_{clean_name}_{timestamp}.jpg"
             cv2.imwrite(filename, composite)
 
             # Auto-sync to dataset folder
@@ -733,6 +768,7 @@ class LiveIrisRecognition:
                 'iris_image': iris_image,
                 'eye_roi': eye_roi,
                 'person_id': person_id,
+                'name': name,
                 'confidence': confidence,
                 'timestamp': timestamp,
                 'filename': filename,
@@ -947,11 +983,14 @@ class LiveIrisRecognition:
                     # Add detailed analysis information
                     analysis = capture_data.get('analysis', {})
 
-                    # Line 1: Person ID and Session Number
+                    # Line 1: Person ID and Name
                     info_y = y_pos + img_size//2 + 15
-                    person_text = f"#{capture_data.get('session_number', i+1)} Person {capture_data['person_id']}"
+                    name = capture_data.get('name', 'Unknown')
+                    # Truncate name if too long
+                    if len(name) > 15: name = name[:13] + "..."
+                    person_text = f"#{capture_data.get('session_number', i+1)} {name} (ID:{capture_data['person_id']})"
                     cv2.putText(gallery, person_text, (x_pos, info_y),
-                               cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 1)
+                               cv2.FONT_HERSHEY_SIMPLEX, 0.35, (255, 255, 255), 1)
 
                     # Line 2: Confidence and Quality
                     info_y += 15
