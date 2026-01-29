@@ -651,26 +651,7 @@ def show_voting_interface(person_id: int, confidence_score: float):
 
                 messagebox.showinfo("Vote Cast Successfully", success_message)
                 # Save receipt locally (JSON)
-                try:
-                    receipt_dir = "receipts"
-                    if not os.path.exists(receipt_dir):
-                        os.makedirs(receipt_dir)
-                        
-                    receipt_path = os.path.join(receipt_dir, "vote_receipt_{}_{}.json".format(person_id, datetime.now().strftime('%Y%m%d_%H%M%S')))
-                    with open(receipt_path, 'w') as f:
-                        json.dump({
-                            'person_id': person_id,
-                            'party_symbol': str(selected_party_symbol),
-                            'party_name': str(selected_party_name),
-                            'timestamp': current_time,
-                            'confidence': float(confidence_score),
-                            'election': elections[election_combo.current()]['name'] if elections else 'General'
-                        }, f, indent=2)
-                    messagebox.showinfo("Receipt Saved", "Receipt saved to: {}".format(receipt_path))
-                except Exception:
-                    pass
-                
-                # Generate Beautiful JPEG Receipt (Replacing PDF/JSON preference)
+                # Generate Beautiful JPEG Receipt (Replacing JSON)
                 try:
                     jpeg_path = generate_jpeg_receipt(
                         person_id=person_id,
@@ -687,7 +668,7 @@ def show_voting_interface(person_id: int, confidence_score: float):
                             os.startfile(jpeg_path)
                         except Exception:
                             pass
-                        messagebox.showinfo("Digital Receipt", f"Official Voting Receipt Generated:\n{jpeg_path}\n\nYou can download/keep this image.")
+                        messagebox.showinfo("Digital Receipt", f"Official Voting Receipt Generated:\n{jpeg_path}\n\nYou can keep this image as proof of your vote.")
                 except Exception as e:
                     print(f"Receipt Error: {e}") 
                     pass
@@ -993,32 +974,13 @@ def show_enhanced_voting_interface(person_id: int, confidence_score: float, iris
                                      "Your vote has been securely recorded and encrypted.")
 
                         messagebox.showinfo("Vote Cast Successfully", receipt_msg)
-                        # Save receipt
-                        try:
-                            receipt_dir = "receipts"
-                            if not os.path.exists(receipt_dir):
-                                os.makedirs(receipt_dir)
-                                
-                            receipt_path = os.path.join(receipt_dir, "vote_receipt_{}_{}.json".format(person_id, datetime.now().strftime('%Y%m%d_%H%M%S')))
-                            with open(receipt_path, 'w') as f:
-                                json.dump({
-                                    'person_id': person_id,
-                                    'party_symbol': party_symbol_str,
-                                    'party_name': party_name_str,
-                                    'timestamp': current_time,
-                                    'confidence': float(confidence_score),
-                                    'election': elections[enhanced_election_combo.current()]['name'] if elections else 'General'
-                                }, f, indent=2)
-                        except Exception:
-                            pass
-                        
                         # Generate JPEG Receipt
                         try:
                             jpeg_path = generate_jpeg_receipt(
                                 person_id=person_id,
                                 username=username,
-                                party_name=party_name_str,
-                                party_symbol=party_symbol_str,
+                                party_name=str(party_name),
+                                party_symbol=str(party_symbol),
                                 timestamp=current_time,
                                 confidence_score=float(confidence_score),
                                 election=elections[enhanced_election_combo.current()]['name'] if elections else 'General'
@@ -1026,7 +988,7 @@ def show_enhanced_voting_interface(person_id: int, confidence_score: float, iris
                             if jpeg_path:
                                 try: os.startfile(jpeg_path)
                                 except: pass
-                                messagebox.showinfo("Digital Receipt", f"Official Voting Receipt Generated:\n{jpeg_path}\n\nYou can download/keep this image.")
+                                messagebox.showinfo("Digital Receipt", f"Official Voting Receipt Generated:\n{jpeg_path}\n\nYou can keep this image as proof of your vote.")
                         except Exception: pass
 
                         # Close Logic
